@@ -1,0 +1,10 @@
+---
+title: "Atividade 3 - Regressão Linear"
+author: "Beatriz Lucena"
+date: "2025-11-15"
+categories: [code, analysis]
+image: "image.jpg"
+
+jupyter: python3
+
+---

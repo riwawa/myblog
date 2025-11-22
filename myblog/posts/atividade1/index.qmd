@@ -1,0 +1,70 @@
+---
+title: "Atividade 1 - Cotação do Dólar por Período"
+author: "Beatriz Lucena"
+date: "2025-11-15"
+categories: [code, analysis]
+image: "image.jpg"
+
+jupyter: python3
+
+---
+## Introdução
+
+Nesta atividade deveríamos criar uma rotina que recebe como entrada uma string no formato `"MMYYYY"`  
+e retorna um **gráfico de linha com a variação diária da cotação do dólar** naquele mês.
+
+A API usada é a PTAX (Banco Central do Brasil).  
+Ela fornece a cotação diária do dólar, mas **somente nos dias úteis**, então dias sem cotação (feriados, fins de semana) precisam ser preenchidos usando a última cotação válida — isso foi implementado no código abaixo.
+
+```{python}
+import requests
+import pandas as pd
+import calendar
+from datetime import datetime
+import plotly.express as px
+
+def f(mmyyyy):
+    first_date = datetime.strptime(mmyyyy, "%m%Y")
+    last_day = calendar.monthrange(first_date.year, first_date.month)[1]
+    last_date = first_date.replace(day=last_day)
+
+    formato1_ini = first_date.strftime("%m-%d-%Y")
+    formato1_fim = last_date.strftime("%m-%d-%Y")
+
+    formato2_ini = first_date.strftime("%d-%m-%Y")
+    formato2_fim = last_date.strftime("%d-%m-%Y")
+
+    def consulta(api_ini, api_fim):
+        url = (
+            "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/"
+            "CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)"
+            f"?@dataInicial='{api_ini}'&@dataFinalCotacao='{api_fim}'"
+            "&$format=json"
+        )
+        return requests.get(url).json()["value"]
+
+    dados = consulta(formato1_ini, formato1_fim)
+    if len(dados) == 0:
+        dados = consulta(formato2_ini, formato2_fim)
+
+    df = pd.DataFrame(dados)
+    df["dataHoraCotacao"] = pd.to_datetime(df["dataHoraCotacao"])
+    df = df.sort_values("dataHoraCotacao")
+
+    all_dates = pd.date_range(start=first_date, end=last_date)
+    df_full = pd.DataFrame({"data": all_dates})
+    df_full = df_full.merge(df, left_on="data", right_on="dataHoraCotacao", how="left")
+
+    df_full["cotacaoCompra"] = df_full["cotacaoCompra"].fillna(method="ffill")
+
+    fig = px.line(df_full, x="data", y="cotacaoCompra",
+                  title=f"Cotação do Dólar — {mmyyyy}")
+    return fig
+
+```
+
+```{python}
+# mês 6, ano 2015
+fig = f("062015")
+fig
+```

@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Atividade 1 - Cotação do Dólar por Período",
+    "section": "",
+    "text": "import requests\nimport pandas as pd\nimport calendar\nfrom datetime import datetime\nimport plotly.express as px\n\n\ndef f(mmyyyy):\n    # 1. Datas inicial e final\n    first_date = datetime.strptime(mmyyyy, \"%m%Y\")\n    last_day = calendar.monthrange(first_date.year, first_date.month)[1]\n    last_date = first_date.replace(day=last_day)\n\n    data_inicial = first_date.strftime(\"%m-%d-%Y\")\n    data_final = last_date.strftime(\"%m-%d-%Y\")\n\n    # 2. URL da API PTAX\n    url = (\n        \"https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/\"\n        \"CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)\"\n        f\"?@dataInicial='{data_inicial}'&@dataFinalCotacao='{data_final}'\"\n        \"&$format=json\"\n    )\n\n    resposta = requests.get(url).json()\n\n    # 3. DataFrame\n    df = pd.DataFrame(resposta[\"value\"])\n    df[\"dataHoraCotacao\"] = pd.to_datetime(df[\"dataHoraCotacao\"])\n    df = df.sort_values(\"dataHoraCotacao\")\n\n    # 4. Criar série diária e preencher faltas\n    all_dates = pd.date_range(start=first_date, end=last_date, freq=\"D\")\n    df_full = pd.DataFrame({\"data\": all_dates})\n\n    df_full = df_full.merge(\n        df[[\"dataHoraCotacao\", \"cotacaoCompra\"]],\n        how=\"left\",\n        left_on=\"data\",\n        right_on=\"dataHoraCotacao\"\n    )\n\n    df_full.drop(columns=[\"dataHoraCotacao\"], inplace=True)\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"ffill\")\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"bfill\")\n\n    # 5. Gráfico\n    fig = px.line(\n        df_full,\n        x=\"data\",\n        y=\"cotacaoCompra\",\n        title=f\"Cotação do Dólar — {first_date.strftime('%m/%Y')}\",\n        labels={\"data\": \"Data\", \"cotacaoCompra\": \"Cotação (R$)\"}\n    )\n\n    return fig\n# mês 6, ano 2015\nfig = f(\"062015\")\nfig"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "myblog",
+    "section": "",
+    "text": "Atividade 2 - Monitoramento de Frota de Ônibus\n\n\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nNov 19, 2025\n\n\nBeatriz Lucena\n\n\n\n\n\n\n\n\n\n\n\n\nAtividade 3 - Regressão Linear\n\n\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nNov 15, 2025\n\n\nBeatriz Lucena\n\n\n\n\n\n\n\n\n\n\n\n\nAtividade 1 - Cotação do Dólar por Período\n\n\n\ncode\n\nanalysis\n\n\n\n\n\n\n\n\n\nNov 15, 2025\n\n\nBeatriz Lucena\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/atividade1/index.html",
+    "href": "posts/atividade1/index.html",
+    "title": "Atividade 1 - Cotação do Dólar por Período",
+    "section": "",
+    "text": "Nesta atividade deveríamos criar uma rotina que recebe como entrada uma string no formato \"MMYYYY\"\ne retorna um gráfico de linha com a variação diária da cotação do dólar naquele mês.\nA API usada é a PTAX (Banco Central do Brasil).\nEla fornece a cotação diária do dólar, mas somente nos dias úteis, então dias sem cotação (feriados, fins de semana) precisam ser preenchidos usando a última cotação válida — isso foi implementado no código abaixo.\n\nimport requests\nimport pandas as pd\nimport calendar\nfrom datetime import datetime\nimport plotly.express as px\n\ndef f(mmyyyy):\n    first_date = datetime.strptime(mmyyyy, \"%m%Y\")\n    last_day = calendar.monthrange(first_date.year, first_date.month)[1]\n    last_date = first_date.replace(day=last_day)\n\n    formato1_ini = first_date.strftime(\"%m-%d-%Y\")\n    formato1_fim = last_date.strftime(\"%m-%d-%Y\")\n\n    formato2_ini = first_date.strftime(\"%d-%m-%Y\")\n    formato2_fim = last_date.strftime(\"%d-%m-%Y\")\n\n    def consulta(api_ini, api_fim):\n        url = (\n            \"https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/\"\n            \"CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)\"\n            f\"?@dataInicial='{api_ini}'&@dataFinalCotacao='{api_fim}'\"\n            \"&$format=json\"\n        )\n        return requests.get(url).json()[\"value\"]\n\n    dados = consulta(formato1_ini, formato1_fim)\n    if len(dados) == 0:\n        dados = consulta(formato2_ini, formato2_fim)\n\n    df = pd.DataFrame(dados)\n    df[\"dataHoraCotacao\"] = pd.to_datetime(df[\"dataHoraCotacao\"])\n    df = df.sort_values(\"dataHoraCotacao\")\n\n    all_dates = pd.date_range(start=first_date, end=last_date)\n    df_full = pd.DataFrame({\"data\": all_dates})\n    df_full = df_full.merge(df, left_on=\"data\", right_on=\"dataHoraCotacao\", how=\"left\")\n\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"ffill\")\n\n    fig = px.line(df_full, x=\"data\", y=\"cotacaoCompra\",\n                  title=f\"Cotação do Dólar — {mmyyyy}\")\n    return fig\n\n\n# mês 6, ano 2015\nfig = f(\"062015\")\nfig"
+  },
+  {
+    "objectID": "posts/atividade1/index.html#introdução",
+    "href": "posts/atividade1/index.html#introdução",
+    "title": "Atividade 1 - Cotação do Dólar por Período",
+    "section": "",
+    "text": "Nesta atividade deveríamos criar uma rotina que recebe como entrada uma string no formato \"MMYYYY\"\ne retorna um gráfico de linha com a variação diária da cotação do dólar naquele mês.\nA API usada é a PTAX (Banco Central do Brasil).\nEla fornece a cotação diária do dólar, mas somente nos dias úteis, então dias sem cotação (feriados, fins de semana) precisam ser preenchidos usando a última cotação válida — isso foi implementado no código abaixo.\n\nimport requests\nimport pandas as pd\nimport calendar\nfrom datetime import datetime\nimport plotly.express as px\n\ndef f(mmyyyy):\n    first_date = datetime.strptime(mmyyyy, \"%m%Y\")\n    last_day = calendar.monthrange(first_date.year, first_date.month)[1]\n    last_date = first_date.replace(day=last_day)\n\n    formato1_ini = first_date.strftime(\"%m-%d-%Y\")\n    formato1_fim = last_date.strftime(\"%m-%d-%Y\")\n\n    formato2_ini = first_date.strftime(\"%d-%m-%Y\")\n    formato2_fim = last_date.strftime(\"%d-%m-%Y\")\n\n    def consulta(api_ini, api_fim):\n        url = (\n            \"https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/\"\n            \"CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)\"\n            f\"?@dataInicial='{api_ini}'&@dataFinalCotacao='{api_fim}'\"\n            \"&$format=json\"\n        )\n        return requests.get(url).json()[\"value\"]\n\n    dados = consulta(formato1_ini, formato1_fim)\n    if len(dados) == 0:\n        dados = consulta(formato2_ini, formato2_fim)\n\n    df = pd.DataFrame(dados)\n    df[\"dataHoraCotacao\"] = pd.to_datetime(df[\"dataHoraCotacao\"])\n    df = df.sort_values(\"dataHoraCotacao\")\n\n    all_dates = pd.date_range(start=first_date, end=last_date)\n    df_full = pd.DataFrame({\"data\": all_dates})\n    df_full = df_full.merge(df, left_on=\"data\", right_on=\"dataHoraCotacao\", how=\"left\")\n\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"ffill\")\n\n    fig = px.line(df_full, x=\"data\", y=\"cotacaoCompra\",\n                  title=f\"Cotação do Dólar — {mmyyyy}\")\n    return fig\n\n\n# mês 6, ano 2015\nfig = f(\"062015\")\nfig"
+  },
+  {
+    "objectID": "posts/atividade2/index.html",
+    "href": "posts/atividade2/index.html",
+    "title": "Atividade 2 - Monitoramento de Frota de Ônibus",
+    "section": "",
+    "text": "import requests\nimport folium\n\nBASE_URL = \"http://api.olhovivo.sptrans.com.br/v2.1\"\n\ntoken=\"8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94\"\n\ndef autenticar(token):\n    \"\"\"Autentica na API da SPTrans.\"\"\"\n    url = f\"{BASE_URL}/Login/Autenticar?token={token}\"\n    r = requests.post(url)\n    return r.json()\n\ndef buscar_paradas_por_linha(token, codigo_linha):\n    \"\"\"Busca todas as paradas atendidas por uma linha específica.\"\"\"\n    # Autenticar\n    autenticar(token)\n\n    # Buscar paradas\n    url = f\"{BASE_URL}/Parada/BuscarParadasPorLinha?codigoLinha={codigo_linha}\"\n    response = requests.get(url)\n\n    if response.status_code != 200:\n        print(\"Erro:\", response.status_code)\n        return []\n\n    return response.json()\n\n# criar o mapa\ndef construir_mapa(lista_paradas):\n    # Caso a lista venha vazia ou None\n    if not lista_paradas:\n        return \"Nenhuma parada encontrada!\"\n\n    # Calcula o centro automaticamente (média das coordenadas)\n    latitudes = [p[\"py\"] for p in lista_paradas]\n    longitudes = [p[\"px\"] for p in lista_paradas]\n\n    centro = [sum(latitudes) / len(latitudes), sum(longitudes) / len(longitudes)]\n\n    # Cria o mapa centralizado automaticamente\n    m = folium.Map(location=centro, zoom_start=14)\n\n    # Adiciona um marcador para cada parada\n    for p in lista_paradas:\n        folium.Marker(\n            location=[p[\"py\"], p[\"px\"]],\n            popup=p[\"np\"],\n            icon=folium.Icon(color=\"blue\")\n        ).add_to(m)\n\n    return m\n\n\ncodigo_linha = 820010\nparadas = buscar_paradas_por_linha(token, codigo_linha)\nlen(paradas)\nmapa = construir_mapa(paradas)\nmapa\n\nErro: 401\n\n\n'Nenhuma parada encontrada!'"
+  }
+]

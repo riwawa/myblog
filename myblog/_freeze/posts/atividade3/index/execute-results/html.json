@@ -1,0 +1,12 @@
+{
+  "hash": "c4cc1ec0155ea1ab5c77e1b76f76fbbe",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: Atividade 3 - Regressão Linear\nauthor: Beatriz Lucena\ndate: '2025-11-15'\ncategories:\n  - code\n  - analysis\nimage: image.jpg\nformat:\n  html:\n    embed-resources: true\nexecute:\n  echo: true\n  warning: false\n  message: false\n---\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

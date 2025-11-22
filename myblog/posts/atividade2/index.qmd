@@ -1,0 +1,72 @@
+---
+title: "Atividade 2 - Monitoramento de Frota de Ônibus"
+author: "Beatriz Lucena"
+date: "2025-11-19"
+categories: [code, analysis]
+image: "thumbnail.jpg"
+jupyter: python3
+
+---
+```{python}
+import requests
+import folium
+
+BASE_URL = "http://api.olhovivo.sptrans.com.br/v2.1"
+
+token="8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"
+
+def autenticar(token):
+    """Autentica na API da SPTrans."""
+    url = f"{BASE_URL}/Login/Autenticar?token={token}"
+    r = requests.post(url)
+    return r.json()
+
+def buscar_paradas_por_linha(token, codigo_linha):
+    """Busca todas as paradas atendidas por uma linha específica."""
+    # Autenticar
+    autenticar(token)
+
+    # Buscar paradas
+    url = f"{BASE_URL}/Parada/BuscarParadasPorLinha?codigoLinha={codigo_linha}"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        print("Erro:", response.status_code)
+        return []
+
+    return response.json()
+
+# criar o mapa
+def construir_mapa(lista_paradas):
+    # Caso a lista venha vazia ou None
+    if not lista_paradas:
+        return "Nenhuma parada encontrada!"
+
+    # Calcula o centro automaticamente (média das coordenadas)
+    latitudes = [p["py"] for p in lista_paradas]
+    longitudes = [p["px"] for p in lista_paradas]
+
+    centro = [sum(latitudes) / len(latitudes), sum(longitudes) / len(longitudes)]
+
+    # Cria o mapa centralizado automaticamente
+    m = folium.Map(location=centro, zoom_start=14)
+
+    # Adiciona um marcador para cada parada
+    for p in lista_paradas:
+        folium.Marker(
+            location=[p["py"], p["px"]],
+            popup=p["np"],
+            icon=folium.Icon(color="blue")
+        ).add_to(m)
+
+    return m
+
+```
+
+```{python}
+codigo_linha = 820010
+paradas = buscar_paradas_por_linha(token, codigo_linha)
+len(paradas)
+mapa = construir_mapa(paradas)
+mapa
+```

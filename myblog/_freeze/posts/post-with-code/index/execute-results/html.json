@@ -1,0 +1,12 @@
+{
+  "hash": "cb94972af0e68eb44ddeb97e135a8bfa",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Atividade 1 - Cotação do Dólar por Período\"\nauthor: \"Beatriz Lucena\"\ndate: \"2025-11-15\"\ncategories: [code, analysis]\nimage: \"image.jpg\"\nexecute:\n    echo: true\n    warning: false\n    message: false\njupyter: python3\n\n---\n\n```python\nimport requests\nimport pandas as pd\nimport calendar\nfrom datetime import datetime\nimport plotly.express as px\n\n\ndef f(mmyyyy):\n    # 1. Datas inicial e final\n    first_date = datetime.strptime(mmyyyy, \"%m%Y\")\n    last_day = calendar.monthrange(first_date.year, first_date.month)[1]\n    last_date = first_date.replace(day=last_day)\n\n    data_inicial = first_date.strftime(\"%m-%d-%Y\")\n    data_final = last_date.strftime(\"%m-%d-%Y\")\n\n    # 2. URL da API PTAX\n    url = (\n        \"https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/\"\n        \"CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)\"\n        f\"?@dataInicial='{data_inicial}'&@dataFinalCotacao='{data_final}'\"\n        \"&$format=json\"\n    )\n\n    resposta = requests.get(url).json()\n\n    # 3. DataFrame\n    df = pd.DataFrame(resposta[\"value\"])\n    df[\"dataHoraCotacao\"] = pd.to_datetime(df[\"dataHoraCotacao\"])\n    df = df.sort_values(\"dataHoraCotacao\")\n\n    # 4. Criar série diária e preencher faltas\n    all_dates = pd.date_range(start=first_date, end=last_date, freq=\"D\")\n    df_full = pd.DataFrame({\"data\": all_dates})\n\n    df_full = df_full.merge(\n        df[[\"dataHoraCotacao\", \"cotacaoCompra\"]],\n        how=\"left\",\n        left_on=\"data\",\n        right_on=\"dataHoraCotacao\"\n    )\n\n    df_full.drop(columns=[\"dataHoraCotacao\"], inplace=True)\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"ffill\")\n    df_full[\"cotacaoCompra\"] = df_full[\"cotacaoCompra\"].fillna(method=\"bfill\")\n\n    # 5. Gráfico\n    fig = px.line(\n        df_full,\n        x=\"data\",\n        y=\"cotacaoCompra\",\n        title=f\"Cotação do Dólar — {first_date.strftime('%m/%Y')}\",\n        labels={\"data\": \"Data\", \"cotacaoCompra\": \"Cotação (R$)\"}\n    )\n\n    return fig\n```\n\n```python\n# mês 6, ano 2015\nfig = f(\"062015\")\nfig\n```\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

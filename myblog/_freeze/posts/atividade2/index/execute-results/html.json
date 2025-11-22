@@ -1,0 +1,12 @@
+{
+  "hash": "de839f75f50ba26ff4e912823aafc4c9",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "---\ntitle: \"Atividade 2 - Monitoramento de Frota de Ônibus\"\nauthor: \"Beatriz Lucena\"\ndate: \"2025-11-19\"\ncategories: [code, analysis]\n---\n\n::: {#fcd22b04 .cell execution_count=1}\n``` {.python .cell-code}\nimport requests\nimport folium\n\nBASE_URL = \"http://api.olhovivo.sptrans.com.br/v2.1\"\n\ntoken=\"8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94\"\n\ndef autenticar(token):\n    \"\"\"Autentica na API da SPTrans.\"\"\"\n    url = f\"{BASE_URL}/Login/Autenticar?token={token}\"\n    r = requests.post(url)\n    return r.json()\n\ndef buscar_paradas_por_linha(token, codigo_linha):\n    \"\"\"Busca todas as paradas atendidas por uma linha específica.\"\"\"\n    # Autenticar\n    autenticar(token)\n\n    # Buscar paradas\n    url = f\"{BASE_URL}/Parada/BuscarParadasPorLinha?codigoLinha={codigo_linha}\"\n    response = requests.get(url)\n\n    if response.status_code != 200:\n        print(\"Erro:\", response.status_code)\n        return []\n\n    return response.json()\n\n# criar o mapa\ndef construir_mapa(lista_paradas):\n    # Caso a lista venha vazia ou None\n    if not lista_paradas:\n        return \"Nenhuma parada encontrada!\"\n\n    # Calcula o centro automaticamente (média das coordenadas)\n    latitudes = [p[\"py\"] for p in lista_paradas]\n    longitudes = [p[\"px\"] for p in lista_paradas]\n\n    centro = [sum(latitudes) / len(latitudes), sum(longitudes) / len(longitudes)]\n\n    # Cria o mapa centralizado automaticamente\n    m = folium.Map(location=centro, zoom_start=14)\n\n    # Adiciona um marcador para cada parada\n    for p in lista_paradas:\n        folium.Marker(\n            location=[p[\"py\"], p[\"px\"]],\n            popup=p[\"np\"],\n            icon=folium.Icon(color=\"blue\")\n        ).add_to(m)\n\n    return m\n```\n:::\n\n\n::: {#0d7824e4 .cell execution_count=2}\n``` {.python .cell-code}\ncodigo_linha = 820010\nparadas = buscar_paradas_por_linha(token, codigo_linha)\nlen(paradas)\nmapa = construir_mapa(paradas)\nmapa\n```\n\n::: {.cell-output .cell-output-stdout}\n```\nErro: 401\n```\n:::\n\n::: {.cell-output .cell-output-display execution_count=2}\n```\n'Nenhuma parada encontrada!'\n```\n:::\n:::\n\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
