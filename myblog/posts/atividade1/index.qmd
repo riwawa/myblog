@@ -1,9 +1,9 @@
 ---
 title: "Atividade 1 - Cotação do Dólar por Período"
 author: "Beatriz Lucena"
-date: "2025-11-15"
+date: "2025-11-22"
 categories: [code, analysis]
-image: "image.jpg"
+image: "dolar.png"
 
 jupyter: python3
 
@@ -16,6 +16,8 @@ e retorna um **gráfico de linha com a variação diária da cotação do dólar
 A API usada é a PTAX (Banco Central do Brasil).  
 Ela fornece a cotação diária do dólar, mas **somente nos dias úteis**, então dias sem cotação (feriados, fins de semana) precisam ser preenchidos usando a última cotação válida — isso foi implementado no código abaixo.
 
+A data que eu utilizarei será 06/2015
+
 ```{python}
 import requests
 import pandas as pd
@@ -24,41 +26,53 @@ from datetime import datetime
 import plotly.express as px
 
 def f(mmyyyy):
+    # --- identificar início e fim do mês ---
     first_date = datetime.strptime(mmyyyy, "%m%Y")
     last_day = calendar.monthrange(first_date.year, first_date.month)[1]
     last_date = first_date.replace(day=last_day)
 
-    formato1_ini = first_date.strftime("%m-%d-%Y")
-    formato1_fim = last_date.strftime("%m-%d-%Y")
+    # formatos aceitos pela API
+    ini1 = first_date.strftime("%m-%d-%Y")
+    fim1 = last_date.strftime("%m-%d-%Y")
+    ini2 = first_date.strftime("%d-%m-%Y")
+    fim2 = last_date.strftime("%d-%m-%Y")
 
-    formato2_ini = first_date.strftime("%d-%m-%Y")
-    formato2_fim = last_date.strftime("%d-%m-%Y")
-
-    def consulta(api_ini, api_fim):
+    # --- função interna para consultar ---
+    def consulta(ini, fim):
         url = (
             "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/"
             "CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)"
-            f"?@dataInicial='{api_ini}'&@dataFinalCotacao='{api_fim}'"
+            f"?@dataInicial='{ini}'&@dataFinalCotacao='{fim}'"
             "&$format=json"
         )
         return requests.get(url).json()["value"]
 
-    dados = consulta(formato1_ini, formato1_fim)
-    if len(dados) == 0:
-        dados = consulta(formato2_ini, formato2_fim)
+    # tenta no formato 1
+    dados = consulta(ini1, fim1)
 
+    # se voltar vazio, tenta no formato 2
+    if len(dados) == 0:
+        dados = consulta(ini2, fim2)
+
+    # --- transforma em dataframe ---
     df = pd.DataFrame(dados)
     df["dataHoraCotacao"] = pd.to_datetime(df["dataHoraCotacao"])
     df = df.sort_values("dataHoraCotacao")
 
-    all_dates = pd.date_range(start=first_date, end=last_date)
+    # --- criar datas completas ---
+    all_dates = pd.date_range(first_date, last_date)
     df_full = pd.DataFrame({"data": all_dates})
+
+    # juntar com as datas reais da API
     df_full = df_full.merge(df, left_on="data", right_on="dataHoraCotacao", how="left")
 
-    df_full["cotacaoCompra"] = df_full["cotacaoCompra"].fillna(method="ffill")
+    # preencher feriados e fim de semana com cotação anterior
+    df_full["cotacaoCompra"] = df_full["cotacaoCompra"].ffill()
 
+    # --- criar gráfico ---
     fig = px.line(df_full, x="data", y="cotacaoCompra",
                   title=f"Cotação do Dólar — {mmyyyy}")
+    
     return fig
 
 ```

@@ -60,7 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -105,6 +105,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -192,75 +195,767 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<div id="fcd22b04" class="cell" data-execution_count="1">
+<section id="introdução" class="level1">
+<h1>Introdução</h1>
+<p>Nesta atividade implementei um sistema simples de monitoramento de frota utilizando a API Olho Vivo da SPTrans. O código realiza autenticação, consulta paradas e posições de ônibus de uma linha específica e exibe tudo em um mapa interativo gerado com Folium.</p>
+<p>O exercício permitiu praticar chamadas reais a APIs REST, manipulação de dados retornados em JSON e visualização geográfica com marcadores personalizados. Foi útil para entender melhor o fluxo de autenticação, requisições consecutivas e integração entre dados dinâmicos e mapas.</p>
+<div id="894dee68" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> folium</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> folium <span class="im">import</span> Map, Marker, Icon</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>BASE_URL <span class="op">=</span> <span class="st">"http://api.olhovivo.sptrans.com.br/v2.1"</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>token<span class="op">=</span><span class="st">"8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>token <span class="op">=</span> <span class="st">"8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autenticar(token):</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Autentica na API da SPTrans."""</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Login/Autenticar?token=</span><span class="sc">{</span>token<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> requests.post(url)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r.json()</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> buscar_paradas_por_linha(token, codigo_linha):</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Busca todas as paradas atendidas por uma linha específica."""</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Autenticar</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    autenticar(token)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Buscar paradas</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Parada/BuscarParadasPorLinha?codigoLinha=</span><span class="sc">{</span>codigo_linha<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(url)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> response.status_code <span class="op">!=</span> <span class="dv">200</span>:</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Erro:"</span>, response.status_code)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> response.json()</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># criar o mapa</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> construir_mapa(lista_paradas):</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Caso a lista venha vazia ou None</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> lista_paradas:</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Nenhuma parada encontrada!"</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calcula o centro automaticamente (média das coordenadas)</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    latitudes <span class="op">=</span> [p[<span class="st">"py"</span>] <span class="cf">for</span> p <span class="kw">in</span> lista_paradas]</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    longitudes <span class="op">=</span> [p[<span class="st">"px"</span>] <span class="cf">for</span> p <span class="kw">in</span> lista_paradas]</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    centro <span class="op">=</span> [<span class="bu">sum</span>(latitudes) <span class="op">/</span> <span class="bu">len</span>(latitudes), <span class="bu">sum</span>(longitudes) <span class="op">/</span> <span class="bu">len</span>(longitudes)]</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Cria o mapa centralizado automaticamente</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> folium.Map(location<span class="op">=</span>centro, zoom_start<span class="op">=</span><span class="dv">14</span>)</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adiciona um marcador para cada parada</span></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> lista_paradas:</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        folium.Marker(</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            location<span class="op">=</span>[p[<span class="st">"py"</span>], p[<span class="st">"px"</span>]],</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            popup<span class="op">=</span>p[<span class="st">"np"</span>],</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            icon<span class="op">=</span>folium.Icon(color<span class="op">=</span><span class="st">"blue"</span>)</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        ).add_to(m)</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar sessão </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> requests.Session()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- autenticação -------</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autenticar():</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Login/Autenticar?token=</span><span class="sc">{</span>token<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.post(url)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Autenticado?"</span>, r.json())</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> buscar_paradas(codigo_linha):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    autenticar()</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Parada/BuscarParadasPorLinha?codigoLinha=</span><span class="sc">{</span>codigo_linha<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.get(url)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r.status_code <span class="op">!=</span> <span class="dv">200</span>:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Erro:"</span>, r.status_code)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r.json()</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> buscar_posicoes(codigo_linha):</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    autenticar()</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Posicao/Linha?codigoLinha=</span><span class="sc">{</span>codigo_linha<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.get(url)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    dados <span class="op">=</span> r.json()</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"vs"</span> <span class="kw">in</span> dados:</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> dados[<span class="st">"vs"</span>]</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> []</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> construir_mapa(paradas, onibus):</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> paradas:</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Sem paradas!"</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># centralizar no 3º ponto como na aula (mas seguro)</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    centro <span class="op">=</span> [paradas[<span class="dv">0</span>][<span class="st">"py"</span>], paradas[<span class="dv">0</span>][<span class="st">"px"</span>]]</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> Map(location<span class="op">=</span>centro, zoom_start<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- adicionar paradas (azul) ----</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> paradas:</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        Marker(</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            location<span class="op">=</span>[p[<span class="st">"py"</span>], p[<span class="st">"px"</span>]],</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            popup<span class="op">=</span>p[<span class="st">"np"</span>],</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>            icon<span class="op">=</span>Icon(color<span class="op">=</span><span class="st">"blue"</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        ).add_to(m)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- adicionar ônibus (vermelho) ----</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> v <span class="kw">in</span> onibus:</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        Marker(</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>            location<span class="op">=</span>[v[<span class="st">"py"</span>], v[<span class="st">"px"</span>]],</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>            popup<span class="op">=</span><span class="ss">f"Ônibus </span><span class="sc">{</span>v[<span class="st">'p'</span>]<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>            icon<span class="op">=</span>Icon(color<span class="op">=</span><span class="st">"red"</span>)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        ).add_to(m)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="0d7824e4" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>codigo_linha <span class="op">=</span> <span class="dv">820010</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>paradas <span class="op">=</span> buscar_paradas_por_linha(token, codigo_linha)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(paradas)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mapa <span class="op">=</span> construir_mapa(paradas)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>mapa</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="e0a495de" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>codigo <span class="op">=</span> <span class="dv">1273</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>paradas <span class="op">=</span> buscar_paradas(codigo)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Paradas encontradas:"</span>, <span class="bu">len</span>(paradas))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>onibus <span class="op">=</span> buscar_posicoes(codigo)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Ônibus encontrados:"</span>, <span class="bu">len</span>(onibus))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> construir_mapa(paradas, onibus)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Erro: 401</code></pre>
+<pre><code>Autenticado? True
+Paradas encontradas: 15
+Autenticado? True
+Ônibus encontrados: 0</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>'Nenhuma parada encontrada!'</code></pre>
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -&gt; Trust Notebook</span><iframe srcdoc="<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; />
+    <script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;></script>
+    <script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;></script>
+    <script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;></script>
+    <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;></script>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/>
+    
+            <meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; />
+            <style>
+                #map_fdd508e623e07be33fa3b81e086db0ff {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class=&quot;folium-map&quot; id=&quot;map_fdd508e623e07be33fa3b81e086db0ff&quot; ></div>
+        
+</body>
+<script>
+    
+    
+            var map_fdd508e623e07be33fa3b81e086db0ff = L.map(
+                &quot;map_fdd508e623e07be33fa3b81e086db0ff&quot;,
+                {
+                    center: [-23.534564, -46.654302],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 14,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_d5dc32971a691cccc0edf4ba7fc51563 = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_d5dc32971a691cccc0edf4ba7fc51563.addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var marker_9adae14f2d0646bb1bd42205a30cd7e9 = L.marker(
+                [-23.534564, -46.654302],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_5d6a2033b43cb898536c6bb9df1a44fd = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_b2e236b7439a5308164a9956878a4b43 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_129b1f0b958de1123bb13b8603e720e8 = $(`<div id=&quot;html_129b1f0b958de1123bb13b8603e720e8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANGELICA B/C</div>`)[0];
+                popup_b2e236b7439a5308164a9956878a4b43.setContent(html_129b1f0b958de1123bb13b8603e720e8);
+            
+        
+
+        marker_9adae14f2d0646bb1bd42205a30cd7e9.bindPopup(popup_b2e236b7439a5308164a9956878a4b43)
+        ;
+
+        
+    
+    
+                marker_9adae14f2d0646bb1bd42205a30cd7e9.setIcon(icon_5d6a2033b43cb898536c6bb9df1a44fd);
+            
+    
+            var marker_7b8970da0811a047091464c9aa3893c1 = L.marker(
+                [-23.525799, -46.679251],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_c8d8ce8fc2ce326fe9aa8fa29b4045c7 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_4c3d917406ad0dca12f5beca8d80f17e = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_2282d47364fceac4778cb30ba6f75e92 = $(`<div id=&quot;html_2282d47364fceac4778cb30ba6f75e92&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PARADA PALMEIRAS B/C</div>`)[0];
+                popup_4c3d917406ad0dca12f5beca8d80f17e.setContent(html_2282d47364fceac4778cb30ba6f75e92);
+            
+        
+
+        marker_7b8970da0811a047091464c9aa3893c1.bindPopup(popup_4c3d917406ad0dca12f5beca8d80f17e)
+        ;
+
+        
+    
+    
+                marker_7b8970da0811a047091464c9aa3893c1.setIcon(icon_c8d8ce8fc2ce326fe9aa8fa29b4045c7);
+            
+    
+            var marker_c04ea7611114c2c1d3f64d8f641c2485 = L.marker(
+                [-23.526523, -46.673588],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_ef1f9e08f7e17d74aa54dd7a63f33c20 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_809abcb9471fcdfdd649ae3c1b3581b4 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_2a470d1b8b9f1ce87f90b7f2c776f1f4 = $(`<div id=&quot;html_2a470d1b8b9f1ce87f90b7f2c776f1f4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANTARTICA B/C</div>`)[0];
+                popup_809abcb9471fcdfdd649ae3c1b3581b4.setContent(html_2a470d1b8b9f1ce87f90b7f2c776f1f4);
+            
+        
+
+        marker_c04ea7611114c2c1d3f64d8f641c2485.bindPopup(popup_809abcb9471fcdfdd649ae3c1b3581b4)
+        ;
+
+        
+    
+    
+                marker_c04ea7611114c2c1d3f64d8f641c2485.setIcon(icon_ef1f9e08f7e17d74aa54dd7a63f33c20);
+            
+    
+            var marker_dc9b2947f2a0403e0031032bff9adf82 = L.marker(
+                [-23.528131, -46.670652],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_9678b20ff65c2aeb86d83fdc59e2e697 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_b190188041fc74b3e26368ae449b249e = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_e777e2cca51cf38934e7265409b3e338 = $(`<div id=&quot;html_e777e2cca51cf38934e7265409b3e338&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>BABY BARIONY B/C</div>`)[0];
+                popup_b190188041fc74b3e26368ae449b249e.setContent(html_e777e2cca51cf38934e7265409b3e338);
+            
+        
+
+        marker_dc9b2947f2a0403e0031032bff9adf82.bindPopup(popup_b190188041fc74b3e26368ae449b249e)
+        ;
+
+        
+    
+    
+                marker_dc9b2947f2a0403e0031032bff9adf82.setIcon(icon_9678b20ff65c2aeb86d83fdc59e2e697);
+            
+    
+            var marker_26eff8026b77c2b508a9eb90899d60fb = L.marker(
+                [-23.53021, -46.6669],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_42ba36a7b1956fd816d6a73e7dbc171a = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_364aecbb1907d1f790b13414280ce05c = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_3f155f0ef8011e2d2f2a3dfcd2d747fe = $(`<div id=&quot;html_3f155f0ef8011e2d2f2a3dfcd2d747fe&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PQ. DA ÁGUA BRANCA B/C</div>`)[0];
+                popup_364aecbb1907d1f790b13414280ce05c.setContent(html_3f155f0ef8011e2d2f2a3dfcd2d747fe);
+            
+        
+
+        marker_26eff8026b77c2b508a9eb90899d60fb.bindPopup(popup_364aecbb1907d1f790b13414280ce05c)
+        ;
+
+        
+    
+    
+                marker_26eff8026b77c2b508a9eb90899d60fb.setIcon(icon_42ba36a7b1956fd816d6a73e7dbc171a);
+            
+    
+            var marker_8123497fb1ee239ed2252a02f4d0331d = L.marker(
+                [-23.52494, -46.698995],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_e09116a6fff0de7d3be4730bae5481fd = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_81246feaf3515be213d21a86c02ed5f9 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_c41e222fd5b97d62929da7c3c8b84f02 = $(`<div id=&quot;html_c41e222fd5b97d62929da7c3c8b84f02&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>SCIPIAO B/C</div>`)[0];
+                popup_81246feaf3515be213d21a86c02ed5f9.setContent(html_c41e222fd5b97d62929da7c3c8b84f02);
+            
+        
+
+        marker_8123497fb1ee239ed2252a02f4d0331d.bindPopup(popup_81246feaf3515be213d21a86c02ed5f9)
+        ;
+
+        
+    
+    
+                marker_8123497fb1ee239ed2252a02f4d0331d.setIcon(icon_e09116a6fff0de7d3be4730bae5481fd);
+            
+    
+            var marker_6cca7a1c15420a6af86cdd2aecad3bf5 = L.marker(
+                [-23.524994, -46.695297],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_47ebb628526a05a4e376ecff0a756a6a = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_f743a32f13281ddf53458e139621ad2d = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_09f289e804a12bbc53a4229b1103c9ec = $(`<div id=&quot;html_09f289e804a12bbc53a4229b1103c9ec&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>VESPASIANO B/C</div>`)[0];
+                popup_f743a32f13281ddf53458e139621ad2d.setContent(html_09f289e804a12bbc53a4229b1103c9ec);
+            
+        
+
+        marker_6cca7a1c15420a6af86cdd2aecad3bf5.bindPopup(popup_f743a32f13281ddf53458e139621ad2d)
+        ;
+
+        
+    
+    
+                marker_6cca7a1c15420a6af86cdd2aecad3bf5.setIcon(icon_47ebb628526a05a4e376ecff0a756a6a);
+            
+    
+            var marker_7a9f38e409cbc1ea6125ae8059d498f8 = L.marker(
+                [-23.525029, -46.690074],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_4191f10bef6988e0d281940a2257645b = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_bc3ccadcb318b58850cd528cb87be7bc = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_5e4c538f9e7fa6441ba83eb583c48fa7 = $(`<div id=&quot;html_5e4c538f9e7fa6441ba83eb583c48fa7&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>CORNELIA</div>`)[0];
+                popup_bc3ccadcb318b58850cd528cb87be7bc.setContent(html_5e4c538f9e7fa6441ba83eb583c48fa7);
+            
+        
+
+        marker_7a9f38e409cbc1ea6125ae8059d498f8.bindPopup(popup_bc3ccadcb318b58850cd528cb87be7bc)
+        ;
+
+        
+    
+    
+                marker_7a9f38e409cbc1ea6125ae8059d498f8.setIcon(icon_4191f10bef6988e0d281940a2257645b);
+            
+    
+            var marker_33334fb9ff2b8d02573fafcc6952bd9a = L.marker(
+                [-23.523407, -46.700541],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_e8284dd99f2da6c0badd7713c0ab1dd8 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_1a876c7c6e959908470b6a9401c3967a = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_26355da005114498e1c0419b78b45b34 = $(`<div id=&quot;html_26355da005114498e1c0419b78b45b34&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>CATAO B/C</div>`)[0];
+                popup_1a876c7c6e959908470b6a9401c3967a.setContent(html_26355da005114498e1c0419b78b45b34);
+            
+        
+
+        marker_33334fb9ff2b8d02573fafcc6952bd9a.bindPopup(popup_1a876c7c6e959908470b6a9401c3967a)
+        ;
+
+        
+    
+    
+                marker_33334fb9ff2b8d02573fafcc6952bd9a.setIcon(icon_e8284dd99f2da6c0badd7713c0ab1dd8);
+            
+    
+            var marker_b5513d11400b246c197a56c88d1e5736 = L.marker(
+                [-23.52517, -46.683408],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_f72354eb86652af5e405151946c31c08 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_5bf6283f2fe5fc713884d95850345eed = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_8b24f4fa54382637da15e00fb32d7ad6 = $(`<div id=&quot;html_8b24f4fa54382637da15e00fb32d7ad6&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>SESC POMPEIA B/C</div>`)[0];
+                popup_5bf6283f2fe5fc713884d95850345eed.setContent(html_8b24f4fa54382637da15e00fb32d7ad6);
+            
+        
+
+        marker_b5513d11400b246c197a56c88d1e5736.bindPopup(popup_5bf6283f2fe5fc713884d95850345eed)
+        ;
+
+        
+    
+    
+                marker_b5513d11400b246c197a56c88d1e5736.setIcon(icon_f72354eb86652af5e405151946c31c08);
+            
+    
+            var marker_dc80eac0c6b512c1c29368f00b385f8a = L.marker(
+                [-23.540545, -46.643624],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_b8c6cc04ac437ce21bf25373ff92d145 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_09aba2df0df0301f10969b7efbe6192d = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_f606f185e83be095ab545e8b3063daf3 = $(`<div id=&quot;html_f606f185e83be095ab545e8b3063daf3&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>VITORIA B/C</div>`)[0];
+                popup_09aba2df0df0301f10969b7efbe6192d.setContent(html_f606f185e83be095ab545e8b3063daf3);
+            
+        
+
+        marker_dc80eac0c6b512c1c29368f00b385f8a.bindPopup(popup_09aba2df0df0301f10969b7efbe6192d)
+        ;
+
+        
+    
+    
+                marker_dc80eac0c6b512c1c29368f00b385f8a.setIcon(icon_b8c6cc04ac437ce21bf25373ff92d145);
+            
+    
+            var marker_bd57dd99f386f5f07a1f503f4fc5fee2 = L.marker(
+                [-23.532847, -46.657404],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_b3dc9ea81699376f1c5bfd78fd27bac8 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_5752004aa2953459ee69971c4fffbcea = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_8dbd11d742732815af1a5a112b6d8436 = $(`<div id=&quot;html_8dbd11d742732815af1a5a112b6d8436&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ROSA E SILVA C/B</div>`)[0];
+                popup_5752004aa2953459ee69971c4fffbcea.setContent(html_8dbd11d742732815af1a5a112b6d8436);
+            
+        
+
+        marker_bd57dd99f386f5f07a1f503f4fc5fee2.bindPopup(popup_5752004aa2953459ee69971c4fffbcea)
+        ;
+
+        
+    
+    
+                marker_bd57dd99f386f5f07a1f503f4fc5fee2.setIcon(icon_b3dc9ea81699376f1c5bfd78fd27bac8);
+            
+    
+            var marker_de3813217411eaf862cd33177d5aa177 = L.marker(
+                [-23.538708, -46.646888],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_76b304381d3832dfdd1d37e27bc9c7f7 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_0b06cb0364e7d685ccbe94cd621f9498 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_5e4026b39ea63e20c98880b722c33c99 = $(`<div id=&quot;html_5e4026b39ea63e20c98880b722c33c99&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANA CINTRA B/C</div>`)[0];
+                popup_0b06cb0364e7d685ccbe94cd621f9498.setContent(html_5e4026b39ea63e20c98880b722c33c99);
+            
+        
+
+        marker_de3813217411eaf862cd33177d5aa177.bindPopup(popup_0b06cb0364e7d685ccbe94cd621f9498)
+        ;
+
+        
+    
+    
+                marker_de3813217411eaf862cd33177d5aa177.setIcon(icon_76b304381d3832dfdd1d37e27bc9c7f7);
+            
+    
+            var marker_d04ffb06256f7b125c82d996e90e73e4 = L.marker(
+                [-23.532068, -46.660957],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_df0ddd198743575f42809f0f8c19f4ae = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_d32715f3d342c635fc4c7d629902a95a = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_507dac1d0d5085578b96b7ba31f9c3a8 = $(`<div id=&quot;html_507dac1d0d5085578b96b7ba31f9c3a8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PACAEMBU B/C</div>`)[0];
+                popup_d32715f3d342c635fc4c7d629902a95a.setContent(html_507dac1d0d5085578b96b7ba31f9c3a8);
+            
+        
+
+        marker_d04ffb06256f7b125c82d996e90e73e4.bindPopup(popup_d32715f3d342c635fc4c7d629902a95a)
+        ;
+
+        
+    
+    
+                marker_d04ffb06256f7b125c82d996e90e73e4.setIcon(icon_df0ddd198743575f42809f0f8c19f4ae);
+            
+    
+            var marker_e17c2590aca459f8b2d62db1b2bb44db = L.marker(
+                [-23.536318, -46.651201],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_ea000b94442548734150d28124e7f902 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_960effc8341a1bce45b1af86ab0c4258 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_d6df75e0c0c2601cfaecf7639db00c45 = $(`<div id=&quot;html_d6df75e0c0c2601cfaecf7639db00c45&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>NOTHMANN C/B</div>`)[0];
+                popup_960effc8341a1bce45b1af86ab0c4258.setContent(html_d6df75e0c0c2601cfaecf7639db00c45);
+            
+        
+
+        marker_e17c2590aca459f8b2d62db1b2bb44db.bindPopup(popup_960effc8341a1bce45b1af86ab0c4258)
+        ;
+
+        
+    
+    
+                marker_e17c2590aca459f8b2d62db1b2bb44db.setIcon(icon_ea000b94442548734150d28124e7f902);
+            
+</script>
+</html>" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe></div></div>
 </div>
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

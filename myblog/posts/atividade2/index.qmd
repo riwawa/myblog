@@ -3,60 +3,75 @@ title: "Atividade 2 - Monitoramento de Frota de Ônibus"
 author: "Beatriz Lucena"
 date: "2025-11-19"
 categories: [code, analysis]
-image: "thumbnail.jpg"
+image: "parada.png"
 jupyter: python3
 
 ---
+
+# Introdução
+Nesta atividade implementei um sistema simples de monitoramento de frota utilizando a API Olho Vivo da SPTrans. O código realiza autenticação, consulta paradas e posições de ônibus de uma linha específica e exibe tudo em um mapa interativo gerado com Folium.
+
+O exercício permitiu praticar chamadas reais a APIs REST, manipulação de dados retornados em JSON e visualização geográfica com marcadores personalizados. Foi útil para entender melhor o fluxo de autenticação, requisições consecutivas e integração entre dados dinâmicos e mapas.
+
 ```{python}
 import requests
-import folium
+from folium import Map, Marker, Icon
 
 BASE_URL = "http://api.olhovivo.sptrans.com.br/v2.1"
 
-token="8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"
+token = "8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"
 
-def autenticar(token):
-    """Autentica na API da SPTrans."""
+# Criar sessão 
+s = requests.Session()
+
+# ---- autenticação -------
+def autenticar():
     url = f"{BASE_URL}/Login/Autenticar?token={token}"
-    r = requests.post(url)
+    r = s.post(url)
+    print("Autenticado?", r.json())
+
+def buscar_paradas(codigo_linha):
+    autenticar()
+    url = f"{BASE_URL}/Parada/BuscarParadasPorLinha?codigoLinha={codigo_linha}"
+    r = s.get(url)
+    if r.status_code != 200:
+        print("Erro:", r.status_code)
+        return []
     return r.json()
 
-def buscar_paradas_por_linha(token, codigo_linha):
-    """Busca todas as paradas atendidas por uma linha específica."""
-    # Autenticar
-    autenticar(token)
+def buscar_posicoes(codigo_linha):
+    autenticar()
+    url = f"{BASE_URL}/Posicao/Linha?codigoLinha={codigo_linha}"
+    r = s.get(url)
+    dados = r.json()
+    
+    if "vs" in dados:
+        return dados["vs"]
+    return []
 
-    # Buscar paradas
-    url = f"{BASE_URL}/Parada/BuscarParadasPorLinha?codigoLinha={codigo_linha}"
-    response = requests.get(url)
+def construir_mapa(paradas, onibus):
+    if not paradas:
+        return "Sem paradas!"
 
-    if response.status_code != 200:
-        print("Erro:", response.status_code)
-        return []
+    # centralizar no 3º ponto como na aula (mas seguro)
+    centro = [paradas[0]["py"], paradas[0]["px"]]
 
-    return response.json()
+    m = Map(location=centro, zoom_start=14)
 
-# criar o mapa
-def construir_mapa(lista_paradas):
-    # Caso a lista venha vazia ou None
-    if not lista_paradas:
-        return "Nenhuma parada encontrada!"
-
-    # Calcula o centro automaticamente (média das coordenadas)
-    latitudes = [p["py"] for p in lista_paradas]
-    longitudes = [p["px"] for p in lista_paradas]
-
-    centro = [sum(latitudes) / len(latitudes), sum(longitudes) / len(longitudes)]
-
-    # Cria o mapa centralizado automaticamente
-    m = folium.Map(location=centro, zoom_start=14)
-
-    # Adiciona um marcador para cada parada
-    for p in lista_paradas:
-        folium.Marker(
+    # ---- adicionar paradas (azul) ----
+    for p in paradas:
+        Marker(
             location=[p["py"], p["px"]],
             popup=p["np"],
-            icon=folium.Icon(color="blue")
+            icon=Icon(color="blue")
+        ).add_to(m)
+
+    # ---- adicionar ônibus (vermelho) ----
+    for v in onibus:
+        Marker(
+            location=[v["py"], v["px"]],
+            popup=f"Ônibus {v['p']}",
+            icon=Icon(color="red")
         ).add_to(m)
 
     return m
@@ -64,9 +79,15 @@ def construir_mapa(lista_paradas):
 ```
 
 ```{python}
-codigo_linha = 820010
-paradas = buscar_paradas_por_linha(token, codigo_linha)
-len(paradas)
-mapa = construir_mapa(paradas)
-mapa
+codigo = 1273 
+
+paradas = buscar_paradas(codigo)
+print("Paradas encontradas:", len(paradas))
+
+onibus = buscar_posicoes(codigo)
+print("Ônibus encontrados:", len(onibus))
+
+m = construir_mapa(paradas, onibus)
+m
+
 ```

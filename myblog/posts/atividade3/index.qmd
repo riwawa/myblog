@@ -3,8 +3,70 @@ title: "Atividade 3 - Regressão Linear"
 author: "Beatriz Lucena"
 date: "2025-11-15"
 categories: [code, analysis]
-image: "image.jpg"
+image: "regressaolinear.png"
 
 jupyter: python3
 
 ---
+# Introdução
+Nesta atividade, utilizei o método matricial clássico para ajustar um modelo de regressão linear simples relacionando anos de estudo ao salário. A implementação foi feita completamente em Python, sem bibliotecas prontas de machine learning, para reforçar o entendimento dos fundamentos da regressão.
+
+O modelo resultante produziu um valor de intercepto e inclinação coerentes com a tendência dos dados. A visualização com Plotly permitiu observar de forma clara como a reta ajustada acompanha os pontos reais, mostrando que existe, de fato, uma relação linear positiva entre as variáveis.
+
+```{python}
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+
+# 1. Carregar dados
+X = np.loadtxt("X.txt")
+y = np.loadtxt("y.txt")
+
+# 2. Criar matriz [1, X]
+Xmat = np.column_stack((np.ones(len(X)), X))
+
+# 3. Cálculo matricial: beta = (X'X)^(-1) X'y
+beta = np.linalg.inv(Xmat.T @ Xmat) @ (Xmat.T @ y)
+
+a = float(beta[0])   # intercepto
+b = float(beta[1])   # inclinação
+
+print("Intercepto (a):", a)
+print("Inclinação (b):", b)
+
+# 4. Criar valores da reta (usamos os mesmos x do dataset)
+y_pred = a + b * X
+
+# 5. Gráfico Plotly
+fig = go.Figure()
+
+# Pontos
+fig.add_trace(go.Scatter(
+    x=X,
+    y=y,
+    mode="markers",
+    name="Dados",
+    marker=dict(size=8)
+))
+
+# Reta estimada
+fig.add_trace(go.Scatter(
+    x=X,
+    y=y_pred,
+    mode="lines",
+    name="Reta estimada"
+))
+
+fig.update_layout(
+    title="Regressão Linear: Anos de Estudo vs Salário",
+    xaxis_title="Anos de estudo",
+    yaxis_title="Salário",
+    template="plotly_white"
+)
+
+fig.show()
+
+
+```
+
+Segue o exemplo.
