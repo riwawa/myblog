@@ -1,5 +1,5 @@
 ---
-title: "myblog"
+title: "Blog das 3 Atividades - Beatriz Lucena"
 listing:
   contents: posts
   feed: true
