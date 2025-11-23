@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Beatriz Lucena">
+<meta name="dcterms.date" content="2025-11-19">
+
+<title>Atividade 2 - Monitoramento de Frota de Ônibus – myblog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-db808e44303083b5eb8e7949e0c59488.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">myblog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Atividade 2 - Monitoramento de Frota de Ônibus</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Beatriz Lucena </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 19, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="introdução" class="level1">
+<h1>Introdução</h1>
+<p>Nesta atividade implementei um sistema simples de monitoramento de frota utilizando a API Olho Vivo da SPTrans. O código realiza autenticação, consulta paradas e posições de ônibus de uma linha específica e exibe tudo em um mapa interativo gerado com Folium.</p>
+<p>O exercício permitiu praticar chamadas reais a APIs REST, manipulação de dados retornados em JSON e visualização geográfica com marcadores personalizados. Foi útil para entender melhor o fluxo de autenticação, requisições consecutivas e integração entre dados dinâmicos e mapas.</p>
+<div id="894dee68" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> requests</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> folium <span class="im">import</span> Map, Marker, Icon</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>BASE_URL <span class="op">=</span> <span class="st">"http://api.olhovivo.sptrans.com.br/v2.1"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>token <span class="op">=</span> <span class="st">"8a7d9519cf4e8aca8da1494631030a5ac561326041a8ee9dcfef1a8dfdeeac94"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Criar sessão </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> requests.Session()</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- autenticação -------</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autenticar():</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Login/Autenticar?token=</span><span class="sc">{</span>token<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.post(url)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Autenticado?"</span>, r.json())</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> buscar_paradas(codigo_linha):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    autenticar()</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Parada/BuscarParadasPorLinha?codigoLinha=</span><span class="sc">{</span>codigo_linha<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.get(url)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r.status_code <span class="op">!=</span> <span class="dv">200</span>:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Erro:"</span>, r.status_code)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r.json()</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> buscar_posicoes(codigo_linha):</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    autenticar()</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>BASE_URL<span class="sc">}</span><span class="ss">/Posicao/Linha?codigoLinha=</span><span class="sc">{</span>codigo_linha<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> s.get(url)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    dados <span class="op">=</span> r.json()</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"vs"</span> <span class="kw">in</span> dados:</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> dados[<span class="st">"vs"</span>]</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> []</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> construir_mapa(paradas, onibus):</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> paradas:</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="st">"Sem paradas!"</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># centralizar no 3º ponto como na aula (mas seguro)</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    centro <span class="op">=</span> [paradas[<span class="dv">0</span>][<span class="st">"py"</span>], paradas[<span class="dv">0</span>][<span class="st">"px"</span>]]</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> Map(location<span class="op">=</span>centro, zoom_start<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- adicionar paradas (azul) ----</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> paradas:</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        Marker(</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>            location<span class="op">=</span>[p[<span class="st">"py"</span>], p[<span class="st">"px"</span>]],</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            popup<span class="op">=</span>p[<span class="st">"np"</span>],</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>            icon<span class="op">=</span>Icon(color<span class="op">=</span><span class="st">"blue"</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        ).add_to(m)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ---- adicionar ônibus (vermelho) ----</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> v <span class="kw">in</span> onibus:</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        Marker(</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>            location<span class="op">=</span>[v[<span class="st">"py"</span>], v[<span class="st">"px"</span>]],</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>            popup<span class="op">=</span><span class="ss">f"Ônibus </span><span class="sc">{</span>v[<span class="st">'p'</span>]<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>            icon<span class="op">=</span>Icon(color<span class="op">=</span><span class="st">"red"</span>)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        ).add_to(m)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="e0a495de" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>codigo <span class="op">=</span> <span class="dv">1273</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>paradas <span class="op">=</span> buscar_paradas(codigo)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Paradas encontradas:"</span>, <span class="bu">len</span>(paradas))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>onibus <span class="op">=</span> buscar_posicoes(codigo)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Ônibus encontrados:"</span>, <span class="bu">len</span>(onibus))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> construir_mapa(paradas, onibus)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>m</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Autenticado? True
+Paradas encontradas: 15
+Autenticado? True
+Ônibus encontrados: 0</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -&gt; Trust Notebook</span><iframe srcdoc="<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; />
+    <script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;></script>
+    <script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;></script>
+    <script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;></script>
+    <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;></script>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/>
+    
+            <meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; />
+            <style>
+                #map_fdd508e623e07be33fa3b81e086db0ff {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class=&quot;folium-map&quot; id=&quot;map_fdd508e623e07be33fa3b81e086db0ff&quot; ></div>
+        
+</body>
+<script>
+    
+    
+            var map_fdd508e623e07be33fa3b81e086db0ff = L.map(
+                &quot;map_fdd508e623e07be33fa3b81e086db0ff&quot;,
+                {
+                    center: [-23.534564, -46.654302],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 14,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_d5dc32971a691cccc0edf4ba7fc51563 = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_d5dc32971a691cccc0edf4ba7fc51563.addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var marker_9adae14f2d0646bb1bd42205a30cd7e9 = L.marker(
+                [-23.534564, -46.654302],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_5d6a2033b43cb898536c6bb9df1a44fd = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_b2e236b7439a5308164a9956878a4b43 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_129b1f0b958de1123bb13b8603e720e8 = $(`<div id=&quot;html_129b1f0b958de1123bb13b8603e720e8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANGELICA B/C</div>`)[0];
+                popup_b2e236b7439a5308164a9956878a4b43.setContent(html_129b1f0b958de1123bb13b8603e720e8);
+            
+        
+
+        marker_9adae14f2d0646bb1bd42205a30cd7e9.bindPopup(popup_b2e236b7439a5308164a9956878a4b43)
+        ;
+
+        
+    
+    
+                marker_9adae14f2d0646bb1bd42205a30cd7e9.setIcon(icon_5d6a2033b43cb898536c6bb9df1a44fd);
+            
+    
+            var marker_7b8970da0811a047091464c9aa3893c1 = L.marker(
+                [-23.525799, -46.679251],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_c8d8ce8fc2ce326fe9aa8fa29b4045c7 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_4c3d917406ad0dca12f5beca8d80f17e = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_2282d47364fceac4778cb30ba6f75e92 = $(`<div id=&quot;html_2282d47364fceac4778cb30ba6f75e92&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PARADA PALMEIRAS B/C</div>`)[0];
+                popup_4c3d917406ad0dca12f5beca8d80f17e.setContent(html_2282d47364fceac4778cb30ba6f75e92);
+            
+        
+
+        marker_7b8970da0811a047091464c9aa3893c1.bindPopup(popup_4c3d917406ad0dca12f5beca8d80f17e)
+        ;
+
+        
+    
+    
+                marker_7b8970da0811a047091464c9aa3893c1.setIcon(icon_c8d8ce8fc2ce326fe9aa8fa29b4045c7);
+            
+    
+            var marker_c04ea7611114c2c1d3f64d8f641c2485 = L.marker(
+                [-23.526523, -46.673588],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_ef1f9e08f7e17d74aa54dd7a63f33c20 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_809abcb9471fcdfdd649ae3c1b3581b4 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_2a470d1b8b9f1ce87f90b7f2c776f1f4 = $(`<div id=&quot;html_2a470d1b8b9f1ce87f90b7f2c776f1f4&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANTARTICA B/C</div>`)[0];
+                popup_809abcb9471fcdfdd649ae3c1b3581b4.setContent(html_2a470d1b8b9f1ce87f90b7f2c776f1f4);
+            
+        
+
+        marker_c04ea7611114c2c1d3f64d8f641c2485.bindPopup(popup_809abcb9471fcdfdd649ae3c1b3581b4)
+        ;
+
+        
+    
+    
+                marker_c04ea7611114c2c1d3f64d8f641c2485.setIcon(icon_ef1f9e08f7e17d74aa54dd7a63f33c20);
+            
+    
+            var marker_dc9b2947f2a0403e0031032bff9adf82 = L.marker(
+                [-23.528131, -46.670652],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_9678b20ff65c2aeb86d83fdc59e2e697 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_b190188041fc74b3e26368ae449b249e = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_e777e2cca51cf38934e7265409b3e338 = $(`<div id=&quot;html_e777e2cca51cf38934e7265409b3e338&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>BABY BARIONY B/C</div>`)[0];
+                popup_b190188041fc74b3e26368ae449b249e.setContent(html_e777e2cca51cf38934e7265409b3e338);
+            
+        
+
+        marker_dc9b2947f2a0403e0031032bff9adf82.bindPopup(popup_b190188041fc74b3e26368ae449b249e)
+        ;
+
+        
+    
+    
+                marker_dc9b2947f2a0403e0031032bff9adf82.setIcon(icon_9678b20ff65c2aeb86d83fdc59e2e697);
+            
+    
+            var marker_26eff8026b77c2b508a9eb90899d60fb = L.marker(
+                [-23.53021, -46.6669],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_42ba36a7b1956fd816d6a73e7dbc171a = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_364aecbb1907d1f790b13414280ce05c = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_3f155f0ef8011e2d2f2a3dfcd2d747fe = $(`<div id=&quot;html_3f155f0ef8011e2d2f2a3dfcd2d747fe&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PQ. DA ÁGUA BRANCA B/C</div>`)[0];
+                popup_364aecbb1907d1f790b13414280ce05c.setContent(html_3f155f0ef8011e2d2f2a3dfcd2d747fe);
+            
+        
+
+        marker_26eff8026b77c2b508a9eb90899d60fb.bindPopup(popup_364aecbb1907d1f790b13414280ce05c)
+        ;
+
+        
+    
+    
+                marker_26eff8026b77c2b508a9eb90899d60fb.setIcon(icon_42ba36a7b1956fd816d6a73e7dbc171a);
+            
+    
+            var marker_8123497fb1ee239ed2252a02f4d0331d = L.marker(
+                [-23.52494, -46.698995],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_e09116a6fff0de7d3be4730bae5481fd = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_81246feaf3515be213d21a86c02ed5f9 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_c41e222fd5b97d62929da7c3c8b84f02 = $(`<div id=&quot;html_c41e222fd5b97d62929da7c3c8b84f02&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>SCIPIAO B/C</div>`)[0];
+                popup_81246feaf3515be213d21a86c02ed5f9.setContent(html_c41e222fd5b97d62929da7c3c8b84f02);
+            
+        
+
+        marker_8123497fb1ee239ed2252a02f4d0331d.bindPopup(popup_81246feaf3515be213d21a86c02ed5f9)
+        ;
+
+        
+    
+    
+                marker_8123497fb1ee239ed2252a02f4d0331d.setIcon(icon_e09116a6fff0de7d3be4730bae5481fd);
+            
+    
+            var marker_6cca7a1c15420a6af86cdd2aecad3bf5 = L.marker(
+                [-23.524994, -46.695297],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_47ebb628526a05a4e376ecff0a756a6a = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_f743a32f13281ddf53458e139621ad2d = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_09f289e804a12bbc53a4229b1103c9ec = $(`<div id=&quot;html_09f289e804a12bbc53a4229b1103c9ec&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>VESPASIANO B/C</div>`)[0];
+                popup_f743a32f13281ddf53458e139621ad2d.setContent(html_09f289e804a12bbc53a4229b1103c9ec);
+            
+        
+
+        marker_6cca7a1c15420a6af86cdd2aecad3bf5.bindPopup(popup_f743a32f13281ddf53458e139621ad2d)
+        ;
+
+        
+    
+    
+                marker_6cca7a1c15420a6af86cdd2aecad3bf5.setIcon(icon_47ebb628526a05a4e376ecff0a756a6a);
+            
+    
+            var marker_7a9f38e409cbc1ea6125ae8059d498f8 = L.marker(
+                [-23.525029, -46.690074],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_4191f10bef6988e0d281940a2257645b = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_bc3ccadcb318b58850cd528cb87be7bc = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_5e4c538f9e7fa6441ba83eb583c48fa7 = $(`<div id=&quot;html_5e4c538f9e7fa6441ba83eb583c48fa7&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>CORNELIA</div>`)[0];
+                popup_bc3ccadcb318b58850cd528cb87be7bc.setContent(html_5e4c538f9e7fa6441ba83eb583c48fa7);
+            
+        
+
+        marker_7a9f38e409cbc1ea6125ae8059d498f8.bindPopup(popup_bc3ccadcb318b58850cd528cb87be7bc)
+        ;
+
+        
+    
+    
+                marker_7a9f38e409cbc1ea6125ae8059d498f8.setIcon(icon_4191f10bef6988e0d281940a2257645b);
+            
+    
+            var marker_33334fb9ff2b8d02573fafcc6952bd9a = L.marker(
+                [-23.523407, -46.700541],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_e8284dd99f2da6c0badd7713c0ab1dd8 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_1a876c7c6e959908470b6a9401c3967a = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_26355da005114498e1c0419b78b45b34 = $(`<div id=&quot;html_26355da005114498e1c0419b78b45b34&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>CATAO B/C</div>`)[0];
+                popup_1a876c7c6e959908470b6a9401c3967a.setContent(html_26355da005114498e1c0419b78b45b34);
+            
+        
+
+        marker_33334fb9ff2b8d02573fafcc6952bd9a.bindPopup(popup_1a876c7c6e959908470b6a9401c3967a)
+        ;
+
+        
+    
+    
+                marker_33334fb9ff2b8d02573fafcc6952bd9a.setIcon(icon_e8284dd99f2da6c0badd7713c0ab1dd8);
+            
+    
+            var marker_b5513d11400b246c197a56c88d1e5736 = L.marker(
+                [-23.52517, -46.683408],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_f72354eb86652af5e405151946c31c08 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_5bf6283f2fe5fc713884d95850345eed = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_8b24f4fa54382637da15e00fb32d7ad6 = $(`<div id=&quot;html_8b24f4fa54382637da15e00fb32d7ad6&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>SESC POMPEIA B/C</div>`)[0];
+                popup_5bf6283f2fe5fc713884d95850345eed.setContent(html_8b24f4fa54382637da15e00fb32d7ad6);
+            
+        
+
+        marker_b5513d11400b246c197a56c88d1e5736.bindPopup(popup_5bf6283f2fe5fc713884d95850345eed)
+        ;
+
+        
+    
+    
+                marker_b5513d11400b246c197a56c88d1e5736.setIcon(icon_f72354eb86652af5e405151946c31c08);
+            
+    
+            var marker_dc80eac0c6b512c1c29368f00b385f8a = L.marker(
+                [-23.540545, -46.643624],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_b8c6cc04ac437ce21bf25373ff92d145 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_09aba2df0df0301f10969b7efbe6192d = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_f606f185e83be095ab545e8b3063daf3 = $(`<div id=&quot;html_f606f185e83be095ab545e8b3063daf3&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>VITORIA B/C</div>`)[0];
+                popup_09aba2df0df0301f10969b7efbe6192d.setContent(html_f606f185e83be095ab545e8b3063daf3);
+            
+        
+
+        marker_dc80eac0c6b512c1c29368f00b385f8a.bindPopup(popup_09aba2df0df0301f10969b7efbe6192d)
+        ;
+
+        
+    
+    
+                marker_dc80eac0c6b512c1c29368f00b385f8a.setIcon(icon_b8c6cc04ac437ce21bf25373ff92d145);
+            
+    
+            var marker_bd57dd99f386f5f07a1f503f4fc5fee2 = L.marker(
+                [-23.532847, -46.657404],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_b3dc9ea81699376f1c5bfd78fd27bac8 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_5752004aa2953459ee69971c4fffbcea = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_8dbd11d742732815af1a5a112b6d8436 = $(`<div id=&quot;html_8dbd11d742732815af1a5a112b6d8436&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ROSA E SILVA C/B</div>`)[0];
+                popup_5752004aa2953459ee69971c4fffbcea.setContent(html_8dbd11d742732815af1a5a112b6d8436);
+            
+        
+
+        marker_bd57dd99f386f5f07a1f503f4fc5fee2.bindPopup(popup_5752004aa2953459ee69971c4fffbcea)
+        ;
+
+        
+    
+    
+                marker_bd57dd99f386f5f07a1f503f4fc5fee2.setIcon(icon_b3dc9ea81699376f1c5bfd78fd27bac8);
+            
+    
+            var marker_de3813217411eaf862cd33177d5aa177 = L.marker(
+                [-23.538708, -46.646888],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_76b304381d3832dfdd1d37e27bc9c7f7 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_0b06cb0364e7d685ccbe94cd621f9498 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_5e4026b39ea63e20c98880b722c33c99 = $(`<div id=&quot;html_5e4026b39ea63e20c98880b722c33c99&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>ANA CINTRA B/C</div>`)[0];
+                popup_0b06cb0364e7d685ccbe94cd621f9498.setContent(html_5e4026b39ea63e20c98880b722c33c99);
+            
+        
+
+        marker_de3813217411eaf862cd33177d5aa177.bindPopup(popup_0b06cb0364e7d685ccbe94cd621f9498)
+        ;
+
+        
+    
+    
+                marker_de3813217411eaf862cd33177d5aa177.setIcon(icon_76b304381d3832dfdd1d37e27bc9c7f7);
+            
+    
+            var marker_d04ffb06256f7b125c82d996e90e73e4 = L.marker(
+                [-23.532068, -46.660957],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_df0ddd198743575f42809f0f8c19f4ae = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_d32715f3d342c635fc4c7d629902a95a = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_507dac1d0d5085578b96b7ba31f9c3a8 = $(`<div id=&quot;html_507dac1d0d5085578b96b7ba31f9c3a8&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>PACAEMBU B/C</div>`)[0];
+                popup_d32715f3d342c635fc4c7d629902a95a.setContent(html_507dac1d0d5085578b96b7ba31f9c3a8);
+            
+        
+
+        marker_d04ffb06256f7b125c82d996e90e73e4.bindPopup(popup_d32715f3d342c635fc4c7d629902a95a)
+        ;
+
+        
+    
+    
+                marker_d04ffb06256f7b125c82d996e90e73e4.setIcon(icon_df0ddd198743575f42809f0f8c19f4ae);
+            
+    
+            var marker_e17c2590aca459f8b2d62db1b2bb44db = L.marker(
+                [-23.536318, -46.651201],
+                {
+}
+            ).addTo(map_fdd508e623e07be33fa3b81e086db0ff);
+        
+    
+            var icon_ea000b94442548734150d28124e7f902 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_960effc8341a1bce45b1af86ab0c4258 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_d6df75e0c0c2601cfaecf7639db00c45 = $(`<div id=&quot;html_d6df75e0c0c2601cfaecf7639db00c45&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>NOTHMANN C/B</div>`)[0];
+                popup_960effc8341a1bce45b1af86ab0c4258.setContent(html_d6df75e0c0c2601cfaecf7639db00c45);
+            
+        
+
+        marker_e17c2590aca459f8b2d62db1b2bb44db.bindPopup(popup_960effc8341a1bce45b1af86ab0c4258)
+        ;
+
+        
+    
+    
+                marker_e17c2590aca459f8b2d62db1b2bb44db.setIcon(icon_ea000b94442548734150d28124e7f902);
+            
+</script>
+</html>" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe></div></div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/your-website-url\.example\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
